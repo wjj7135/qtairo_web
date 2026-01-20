@@ -1,0 +1,268 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qtairo Inc. | Quantum AI Robotics</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --bg-deep: #0f1115;
+            --bg-card: #16191e;
+            --logo-teal: #39b5bc;
+            --text-main: #e2e8f0;
+            --text-dim: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            opacity: 0.35;
+        }
+
+        /* --- ORIGINAL GRADATION STRATEGY --- */
+        .feathered-logo {
+            display: block;
+            width: 100%;
+            -webkit-mask-image: radial-gradient(circle at center, black 30%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.3) 75%, rgba(0, 0, 0, 0.05) 90%, transparent 100%);
+            mask-image: radial-gradient(circle at center, black 61%, rgba(0, 0, 0, 0.8) 64%, rgba(0, 0, 0, 0.3) 67%, rgba(0, 0, 0, 0.05) 70%, transparent 100%);
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; text-transform: uppercase; font-size: 11px; letter-spacing: 2px; }
+
+        /* Navigation */
+        .nav-logo-wrap {
+            height: 50px; width: 50px;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+        .nav-logo-wrap img {
+            height: 90px; 
+            -webkit-mask-image: radial-gradient(circle, black 25%, transparent 80%);
+            mask-image: radial-gradient(circle, black 25%, transparent 80%);
+        }
+
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 8%; background: rgba(15, 17, 21, 0.85);
+            backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-links a {
+            color: var(--text-dim); text-decoration: none; margin-left: 25px;
+            font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+        }
+
+        /* Hero */
+        .hero { display: flex; align-items: center; padding: 80px 8%; min-height: 85vh; }
+        .hero-content { flex: 1.1; }
+        .hero-image { flex: 0.9; display: flex; justify-content: center; align-items: center; position: relative; }
+        .hero-image::before {
+            content: ''; position: absolute; width: 380px; height: 380px;
+            background: radial-gradient(circle, rgba(57, 181, 188, 0.12) 0%, transparent 75%);
+        }
+
+        .hero-logo-container { width: 100%; max-width: 460px; z-index: 1; animation: float 6s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+        .highlight { color: var(--logo-teal); font-weight: 800; }
+
+        .cta-btn {
+            background: var(--logo-teal); color: #000; padding: 16px 45px;
+            text-decoration: none; font-weight: 800; border-radius: 4px;
+            display: inline-block; animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(57, 181, 188, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(57, 181, 188, 0); } 100% { box-shadow: 0 0 0 0 rgba(57, 181, 188, 0); } }
+
+        /* Information Cards */
+        .pillars, .info-sections { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; padding: 0 8% 80px; }
+        .pillar-card, .info-card { background: var(--bg-card); padding: 45px; border-radius: 4px; border-top: 1px solid rgba(255, 255, 255, 0.03); transition: 0.3s; }
+        .pillar-card:hover, .info-card:hover { border-top-color: var(--logo-teal); background: #1a1e24; }
+
+        .info-list { list-style: none; }
+        .info-list li { margin-bottom: 12px; color: var(--text-dim); }
+        .info-list span { color: var(--logo-teal); font-weight: 600; }
+        
+        /* Clickable Names */
+        .clickable-name { color: var(--logo-teal); cursor: pointer; text-decoration: underline; text-underline-offset: 4px; transition: 0.2s; }
+        .clickable-name:hover { color: #fff; }
+
+        /* Modal / Bio Popup */
+        .modal {
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+        }
+        .modal-content {
+            background-color: var(--bg-card); margin: 10% auto; padding: 40px;
+            border: 1px solid var(--logo-teal); width: 80%; max-width: 650px; border-radius: 8px;
+        }
+        .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close-btn:hover { color: #fff; }
+
+        footer { padding: 80px 8% 50px; text-align: center; background: #08090b; }
+        .footer-logo-wrap { width: 100px; margin: 0 auto 20px; opacity: 0.9; }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <nav>
+        <div class="nav-logo-wrap">
+            <img src="logo.png" alt="Qtairo">
+        </div>
+        <div class="nav-links mono">
+            <a href="#">RESEARCH</a>
+            <a href="#">LABS</a>
+            <a href="#">CONNECT</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <div class="mono" style="color: var(--logo-teal); margin-bottom: 20px;">R&D INFRASTRUCTURE</div>
+            <h1 style="font-size: 4.2rem; line-height: 1; margin-bottom: 20px;">
+                Quantum-Led <br><span class="highlight">Intelligence.</span>
+            </h1>
+            <p style="font-size: 20px; color: var(--text-dim); max-width: 500px; margin-bottom: 45px; font-weight: 300;">
+                Building the computational foundation for autonomous kinetic systems and neural research.
+            </p>
+            <a href="#" class="cta-btn mono">Initiate Project</a>
+        </div>
+        <div class="hero-image">
+            <div class="hero-logo-container">
+                <img src="logo.png" alt="Qtairo Inc" class="feathered-logo">
+            </div>
+        </div>
+    </section>
+
+    <section class="pillars">
+        <div class="pillar-card">
+            <div class="mono" style="color: var(--logo-teal); margin-bottom: 12px;">Division 01</div>
+            <h3 class="mono">QUANTUM</h3>
+            <p style="color: var(--text-dim);">Solving noise-to-logic ratios for industrial-grade quantum advantage.</p>
+        </div>
+        <div class="pillar-card">
+            <div class="mono" style="color: var(--logo-teal); margin-bottom: 12px;">Division 02</div>
+            <h3 class="mono">AI</h3>
+            <p style="color: var(--text-dim);">Proprietary neural architectures designed for high-frequency kinetic feedback.</p>
+        </div>
+        <div class="pillar-card">
+            <div class="mono" style="color: var(--logo-teal); margin-bottom: 12px;">Division 03</div>
+            <h3 class="mono">ROBOTICS</h3>
+            <p style="color: var(--text-dim);">Physical agents capable of autonomous decision making in unmapped environments.</p>
+        </div>
+    </section>
+
+    <section class="info-sections">
+        <div class="info-card">
+            <div class="mono" style="color: var(--logo-teal); margin-bottom: 12px;">Milestones</div>
+            <h3 class="mono">History</h3>
+            <ul class="info-list">
+                <li><span>Established:</span> Dec 19, 2025</li>
+                <li><span>Operations Commenced:</span> Jan 06, 2026</li>
+            </ul>
+        </div>
+        <div class="info-card">
+            <div class="mono" style="color: var(--logo-teal); margin-bottom: 12px;">Leadership</div>
+            <h3 class="mono">People</h3>
+            <ul class="info-list">
+                <li><span class="clickable-name" onclick="showBio('ceo')">Changsoo Je, PhD</span> / Chief Executive Officer</li>
+                <li><span class="clickable-name" onclick="showBio('director')">Woojeong Jeon</span> / Director</li>
+            </ul>
+        </div>
+    </section>
+
+    <div id="bioModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="mono" id="bioTitle" style="color: var(--logo-teal); margin-bottom: 10px;"></div>
+            <h2 id="bioName" style="margin-bottom: 20px;"></h2>
+            <div id="bioText" style="color: var(--text-dim); line-height: 1.8;"></div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-logo-wrap">
+            <img src="logo.png" alt="Qtairo" class="feathered-logo">
+        </div>
+        <p class="mono" style="color: var(--text-dim); font-size: 11px;">&copy; 2025 QTAIRO INC. | SEOUL R&D LABS</p>
+    </footer>
+
+    <script>
+        // Updated Modest Bio Data
+        const bios = {
+            ceo: {
+                title: "Chief Executive Officer",
+                name: "Changsoo Je, PhD",
+                text: "Changsoo Je is the Chief Executive Officer of Qtairo Inc. He previously served as a Research Professor at Sogang University and held the roles of CTO, Executive Director, and Director of Research Center at Grand Power Solution Co., Ltd. (2024). He also served as CTO and Director of Research Center at e2on Inc. (2023-2024). He holds a Ph.D. in Media Technology from Sogang University, with a background in computer vision and 3D range imaging."
+            },
+            director: {
+                title: "Director",
+                name: "Woojeong Jeon",
+                text: "Woojeong Jeon is a Director at Qtairo Inc. Prior to this role, she worked as a Marketer at ADCONEX (2023.09 - 2025.10) and as a Project Manager at Edgerank (2021.01 - 2023.05). She currently manages project operations and accounts for the company."
+            }
+        };
+
+        function showBio(person) {
+            document.getElementById('bioTitle').innerText = bios[person].title;
+            document.getElementById('bioName').innerText = bios[person].name;
+            document.getElementById('bioText').innerText = bios[person].text;
+            document.getElementById('bioModal').style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById('bioModal').style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('bioModal')) {
+                closeModal();
+            }
+        }
+
+        // Particle Background Script
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function init() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            particles = [];
+            for(let i=0; i<70; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+                    size: Math.random() * 1.5, vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4
+                });
+            }
+        }
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#39b5bc';
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+            });
+            requestAnimationFrame(animate);
+        }
+        window.addEventListener('resize', init);
+        init(); animate();
+    </script>
+</body>
+</html>
