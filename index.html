@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,12 +33,11 @@
             opacity: 0.35;
         }
 
-        /* --- ORIGINAL GRADATION STRATEGY --- */
         .feathered-logo {
             display: block;
             width: 100%;
-            -webkit-mask-image: radial-gradient(circle at center, black 30%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.3) 75%, rgba(0, 0, 0, 0.05) 90%, transparent 100%);
             mask-image: radial-gradient(circle at center, black 61%, rgba(0, 0, 0, 0.8) 64%, rgba(0, 0, 0, 0.3) 67%, rgba(0, 0, 0, 0.05) 70%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle at center, black 61%, rgba(0, 0, 0, 0.8) 64%, rgba(0, 0, 0, 0.3) 67%, rgba(0, 0, 0, 0.05) 70%, transparent 100%);
         }
 
         .mono { font-family: 'JetBrains Mono', monospace; text-transform: uppercase; font-size: 11px; letter-spacing: 2px; }
@@ -51,8 +49,8 @@
         }
         .nav-logo-wrap img {
             height: 90px; 
-            -webkit-mask-image: radial-gradient(circle, black 25%, transparent 80%);
             mask-image: radial-gradient(circle, black 25%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle, black 25%, transparent 80%);
         }
 
         nav {
@@ -183,8 +181,8 @@
             <div class="mono" style="color: var(--logo-teal); margin-bottom: 12px;">Leadership</div>
             <h3 class="mono">People</h3>
             <ul class="info-list">
-                <li><span class="clickable-name" onclick="showBio('ceo')">Changsoo Je, PhD</span> / Chief Executive Officer</li>
-                <li><span class="clickable-name" onclick="showBio('director')">Woojeong Jeon</span> / Director</li>
+                <li><span class="clickable-name" onclick="showBio('cje.html')">Changsoo Je, PhD</span> / Chief Executive Officer</li>
+                <li><span class="clickable-name" onclick="showBio('wjj.html')">Woojeong Jeon</span> / Director</li>
             </ul>
         </div>
     </section>
@@ -192,11 +190,28 @@
     <div id="bioModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
-            <div class="mono" id="bioTitle" style="color: var(--logo-teal); margin-bottom: 10px;"></div>
-            <h2 id="bioName" style="margin-bottom: 20px;"></h2>
-            <div id="bioText" style="color: var(--text-dim); line-height: 1.8;"></div>
+            <div id="bioContainer">
+                </div>
         </div>
     </div>
+
+
+
+
+
+<center>
+            <div class="mono" style="color: var(--logo-teal); margin-bottom: 12px;"></div>
+            <h3 class="mono">&nbsp;&nbsp;&nbsp; Business Registration Number</h3>
+            <ul class="info-list">
+                <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 111</li>                
+            </ul>
+
+            <div class="mono" style="color: var(--logo-teal); margin-bottom: 12px;"></div>
+            <h3 class="mono">&nbsp;&nbsp;&nbsp; Address</h3>
+            <ul class="info-list">
+                <li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Room 3096, 173 Mokdong ro, Yangcheon gu, Seoul, Korea</li>
+            </ul>
+</center>
 
     <footer>
         <div class="footer-logo-wrap">
@@ -206,25 +221,18 @@
     </footer>
 
     <script>
-        // Updated Modest Bio Data
-        const bios = {
-            ceo: {
-                title: "Chief Executive Officer",
-                name: "Changsoo Je, PhD",
-                text: "Changsoo Je is the Chief Executive Officer of Qtairo Inc. He previously served as a Research Professor at Sogang University and held the roles of CTO, Executive Director, and Director of Research Center at Grand Power Solution Co., Ltd. (2024). He also served as CTO and Director of Research Center at e2on Inc. (2023-2024). He holds a Ph.D. in Media Technology from Sogang University, with a background in computer vision and 3D range imaging."
-            },
-            director: {
-                title: "Director",
-                name: "Woojeong Jeon",
-                text: "Woojeong Jeon is a Director at Qtairo Inc. Prior to this role, she worked as a Marketer at ADCONEX (2023.09 - 2025.10) and as a Project Manager at Edgerank (2021.01 - 2023.05). She currently manages project operations and accounts for the company."
+        async function showBio(fileName) {
+            const container = document.getElementById('bioContainer');
+            try {
+                const response = await fetch(fileName);
+                if (!response.ok) throw new Error('Bio file not found');
+                const html = await response.text();
+                container.innerHTML = html;
+                document.getElementById('bioModal').style.display = "block";
+            } catch (error) {
+                console.error("Error loading bio:", error);
+                container.innerHTML = "<p>Bio content unavailable.</p>";
             }
-        };
-
-        function showBio(person) {
-            document.getElementById('bioTitle').innerText = bios[person].title;
-            document.getElementById('bioName').innerText = bios[person].name;
-            document.getElementById('bioText').innerText = bios[person].text;
-            document.getElementById('bioModal').style.display = "block";
         }
 
         function closeModal() {
@@ -266,5 +274,3 @@
     </script>
 </body>
 </html>
-
-
